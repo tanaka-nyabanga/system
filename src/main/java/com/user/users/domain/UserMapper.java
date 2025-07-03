@@ -12,9 +12,8 @@ public interface UserMapper {
     UserDto toDto(User user);
     List<UserDto> toDtos(List<User> users);
 
+    @Mapping (target = "password", ignore = true)
     User toEntity(UserCommand userCommand);
 
-    @Mapping (target = "password", ignore = true)
-    @Mapping (target = "recoveryAnswer", ignore = true)
     void updateUser (@MappingTarget User user, UpdateUserCommand updateUserCommand);
 }
