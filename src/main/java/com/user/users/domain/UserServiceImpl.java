@@ -64,24 +64,17 @@ class UserServiceImpl implements UserService {
             throw new DuplicateExpception("User with name '" + userCommand.username() + "' already exists.");
         }
 
-        User user = new User();
-        user.setUsername(userCommand.username());
-        user.setName(userCommand.name());
-        user.setRole(Role.USER);
-        user.setEmail(userCommand.email());
+        User user = userMapper.toEntity(userCommand);
         user.setPassword(encodedPassword);
-        user.setRecoveryAnswer(userCommand.recoveryAnswer());
-
-        User savedUser = userRepository.save(user);
+        user.setRole(Role.USER);
         log.info("User Created");
-        return userMapper.toDto(savedUser);
+        return userMapper.toDto(userRepository.save(user));
 
     }
 
     @Override
     public UserDto update(long id, UpdateUserCommand updateUserCommand) {
         final User user = userRepository.findById(id).orElseThrow(() -> new NotFoundUserException("User not found with id: " + id));
-
 
         log.info("Looking for user with username: {}", updateUserCommand.username());
         log.info("Looking for user with email: {}", updateUserCommand.email());
@@ -104,12 +97,8 @@ class UserServiceImpl implements UserService {
 
         log.info("##### Updated user: {}", updateUserCommand.name());
 
-        user.setName(updateUserCommand.name());
-        user.setEmail(updateUserCommand.email());
-        user.setUsername(updateUserCommand.username());
-
+        userMapper.toEntity(updateUserCommand);
         User updatedUser = userRepository.save(user);
-
         return userMapper.toDto(updatedUser);
 
 
@@ -182,9 +171,9 @@ class UserServiceImpl implements UserService {
 
         confirmNewPassword = passwordEncoder.encode(confirmNewPassword);
 
+        userMapper.toEntity(changeUserPasswordCommand);
         user.setPassword(confirmNewPassword);
-        User passwordUpdatedUser = userRepository.save(user);
-        return userMapper.toDto(passwordUpdatedUser);
+        return userMapper.toDto(userRepository.save(user));
 
     }
 }
