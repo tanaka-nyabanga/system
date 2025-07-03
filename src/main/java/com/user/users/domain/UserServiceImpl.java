@@ -64,17 +64,11 @@ class UserServiceImpl implements UserService {
             throw new DuplicateExpception("User with name '" + userCommand.username() + "' already exists.");
         }
 
-        User user = new User();
-        user.setUsername(userCommand.username());
-        user.setName(userCommand.name());
-        user.setRole(Role.USER);
-        user.setEmail(userCommand.email());
+        User user = userMapper.toEntity(userCommand);
         user.setPassword(encodedPassword);
-        user.setRecoveryAnswer(userCommand.recoveryAnswer());
-
-        User savedUser = userRepository.save(user);
+        user.setRole(Role.USER);
         log.info("User Created");
-        return userMapper.toDto(savedUser);
+        return userMapper.toDto(userRepository.save(user));
 
     }
 
@@ -82,19 +76,9 @@ class UserServiceImpl implements UserService {
     public UserDto update(long id, UpdateUserCommand updateUserCommand) {
         final User user = userRepository.findById(id).orElseThrow(() -> new NotFoundUserException("User not found with id: " + id));
 
-
         log.info("Looking for user with username: {}", updateUserCommand.username());
         log.info("Looking for user with email: {}", updateUserCommand.email());
 
-        if (updateUserCommand.name() == null || updateUserCommand.name().isEmpty()) {
-            throw new MissingFieldException("Name cannot be empty");
-        }
-        if (updateUserCommand.email() == null || updateUserCommand.email().isEmpty()) {
-            throw new MissingFieldException("Email cannot be empty");
-        }
-        if (updateUserCommand.username() == null || updateUserCommand.username().isEmpty()) {
-            throw new MissingFieldException("Username cannot be empty");
-        }
         if (userRepository.existsByUsernameAndIdNot(updateUserCommand.username(), id)) {
             throw new DuplicateExpception("User with username '" + updateUserCommand.username() + "' already exists.");
         }
@@ -104,15 +88,8 @@ class UserServiceImpl implements UserService {
 
         log.info("##### Updated user: {}", updateUserCommand.name());
 
-        user.setName(updateUserCommand.name());
-        user.setEmail(updateUserCommand.email());
-        user.setUsername(updateUserCommand.username());
-
-        User updatedUser = userRepository.save(user);
-
-        return userMapper.toDto(updatedUser);
-
-
+        userMapper.updateUser(user, updateUserCommand);
+        return userMapper.toDto(userRepository.save(user));
     }
 
     @PostConstruct
@@ -181,10 +158,8 @@ class UserServiceImpl implements UserService {
         }
 
         confirmNewPassword = passwordEncoder.encode(confirmNewPassword);
-
         user.setPassword(confirmNewPassword);
-        User passwordUpdatedUser = userRepository.save(user);
-        return userMapper.toDto(passwordUpdatedUser);
+        return userMapper.toDto(userRepository.save(user));
 
     }
 }
