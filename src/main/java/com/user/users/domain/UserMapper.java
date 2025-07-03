@@ -3,7 +3,7 @@ package com.user.users.domain;
 import com.user.users.service.ChangeUserPasswordCommand;
 import com.user.users.service.UpdateUserCommand;
 import com.user.users.service.UserCommand;
-import org.mapstruct.Mapper;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -11,7 +11,10 @@ import java.util.List;
 public interface UserMapper {
     UserDto toDto(User user);
     List<UserDto> toDtos(List<User> users);
+
     User toEntity(UserCommand userCommand);
-    User toEntity(UpdateUserCommand updateUserCommand);
-    User toEntity(ChangeUserPasswordCommand changeUserPasswordCommand);
+
+    @Mapping (target = "password", ignore = true)
+    @Mapping (target = "recoveryAnswer", ignore = true)
+    void updateUser (@MappingTarget User user, UpdateUserCommand updateUserCommand);
 }

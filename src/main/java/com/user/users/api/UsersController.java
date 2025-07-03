@@ -36,7 +36,7 @@ public class UsersController {
     }
 
     @PutMapping("/update/{id}")
-    @Operation (summary = "Updating the user")
+    @Operation (summary = "Update the user")
     public UserDto update(
             @PathVariable long id,
             @Valid @RequestBody UpdateUserCommand updateUserCommand) {
@@ -44,7 +44,7 @@ public class UsersController {
     }
 
     @PatchMapping("/update/password/{id}")
-    @Operation (summary = "Updating the password")
+    @Operation (summary = "Update the password")
     public UserDto updatePassword(
             @PathVariable long id,
             @Valid  @RequestBody ChangeUserPasswordCommand changeUserPasswordCommand)
